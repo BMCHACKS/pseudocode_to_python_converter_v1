@@ -4,7 +4,7 @@ I request the program be run in a console* for the best experience
 
 Syntax - ORIGINS
 
-This converter is based on the logic that you would find in a CAIE O-A level exam.
+This converter is based on the logic that you would find in a CAIE O-A level exam (2023).
 As such, the syntax is quite simple:
 
 	1 - INPUT / OUTPUT
@@ -21,8 +21,11 @@ As such, the syntax is quite simple:
 	8 - Assignment of variables
 	9 - Simple Arithmetic
 
-	# I know that more things could be added, like array declarations of specific sizes, but, I find it useless to do that since lists in Python are just better
-
+	# I know that more things could be added, like array declarations of specific sizes, opening and closing files, but, I built this program based on what a student might want to 
+ 	# convert based on questions, and since files in questions contain virtual data, users won't ACTUALLY be able to skim the file and do something with it, tho adding the functionality 
+  	# might be fun :)
+   
+	
 Now the syntax of each point: 
 
 	1. INPUT <variable>
