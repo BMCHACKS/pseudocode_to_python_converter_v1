@@ -127,10 +127,13 @@ def class_fixer():
     # currently only works if there is only one record type - opps
     to_add = []
     dtd = [":", "DECLARE", "REAL", "BOOLEAN", "INTEGER", "STRING", "CHAR"]
-    for p in range(len(pcc)):
-        if "class" in pcc[p]: break
+    for p in range (len(pcc)):
+        print(p)
+        if "class" in pcc[p]: 
+            break
     for c in range(len(cr)):
-        if "TYPE" in cr[c]: break 
+        if "TYPE" in cr[c]: 
+            break 
     for i in range(c+1, len(cr)):
         s = [str(x) for x in cr[i].split()]
         for x in dtd:
@@ -139,13 +142,14 @@ def class_fixer():
             except ValueError:
                 pass
         to_add.append(s[0])
+
     s = "   def __init__(self"
     for x in to_add:
-        s = s + ", " + x
+            s = s + ", " + x
     classes.append(f"{s})")
     for x in to_add:
-        classes.append(f"       self.{x} = {x}")
-
+            classes.append(f"       self.{x} = {x}")
+    
 
 def case_of_fixer():
     global pcc
