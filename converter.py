@@ -1,7 +1,7 @@
 '''
     how it works:
-    input is taken line by line, instead of taking it all and storing in a list, 
-    each line is converted and then sotred in the list till 'END' is entered where
+    input is taken line by line, instead of taking it all and storing it in a list, 
+    each line is converted and then stored in the list till 'END' is entered where
     converted lines are output, any extra function called i.e other_fuctions_2(), it 
     is added to the main program once.
 '''
@@ -126,7 +126,6 @@ def class_fixer():
     global classes
     # currently only works if there is only one record type - opps
     to_add = []
-    var_names = []
     dtd = [":", "DECLARE", "REAL", "BOOLEAN", "INTEGER", "STRING", "CHAR"]
     for p in range(len(pcc)):
         if "class" in pcc[p]: break
@@ -148,6 +147,27 @@ def class_fixer():
         classes.append(f"       self.{x} = {x}")
 
 
+def case_of_fixer():
+    global pcc
+
+    for p in range(len(pcc)):
+        if "match" in pcc[p]: break
+    for c in range(len(cr)):
+        if "CASE OF" in cr[c]: break     
+    to_remove = len(pcc) - p
+    for _ in range(to_remove-1): pcc.pop()
+    for i in range(c+1, len(cr)):
+        if "OTHERWISE" in cr[i]:
+            pcc.append("case _:")
+            pcc.append(f"{converter(cr[-1])}")
+        elif "OTHERWISE" not in cr[i-1]:
+            s = [str(x) for x in cr[i].split()]
+            pcc.append(f"case {s[0]}:")
+            s.remove(s[0])
+            s.remove(s[0])
+            pcc.append(converter(" ".join(s)))
+
+
 def converter(x):
     
     # symbols for maths
@@ -156,6 +176,10 @@ def converter(x):
     xl = [str(x) for x in x.split()]
  
     try:
+        if xl[0] == "CASE": return f"match {xl[-1]}:"
+        if xl[0] == "ENDCASE" or xl[0] == "END CASE": 
+            case_of_fixer()
+            return None
         # constant
         if xl[0] == "CONSTANT":
             xl.remove(xl[0])
@@ -209,7 +233,19 @@ def converter(x):
             s = s[:-1]
             return f"{s}:"
 
-
+        # for loop 
+        if xl[0] == "FOR":
+            index_to = xl.index("TO")
+            first_var = " ".join(xl[3: index_to])
+            second_var = " ".join(xl[index_to+1:])
+            if "STEP" not in xl:
+                return f"for {xl[1]} in range({first_var}, {second_var} + 1):"
+            else:
+                index_step = xl.index("STEP")
+                second_var = " ".join(xl[index_to+1: index_step])
+                step = " ".join(xl[index_step+1:])
+                return f"for {xl[1]} in range({first_var}, {second_var}, {step}) "
+            
         # aritimatic stuff
         if any(symbol in xl for symbol in artimatic_symbols):
             for i in range(1, len(xl)):
@@ -217,22 +253,6 @@ def converter(x):
             s = s[:-1]
             s = s.replace("<--", "=")
             return f"{xl[0]} {s}"
-
-
-         #below are loops - FOR, WHILE, REPEAT
-        # Starting with For Loop
-            # additons made: made sure that now for loop can handle variables instead of only int-type
-                # made sure that for loops can hadle ex. FOR COUNT <-- 1 TO var STEP 2 etc.
-        if xl[0] == "FOR":
-            if len(xl) == 8:
-                if xl[3].isnumeric() and xl[5].isnumeric():
-                    return f"for {xl[1]} in range({int(xl[3])}, {int(xl[5])+1}, {int(xl[7])}):"
-                else:
-                    return f"for {xl[1]} in range({xl[3]}, {xl[5]}, {xl[7]}):"
-            elif xl[3].isnumeric() and xl[5].isnumeric():
-                return f"for {xl[1]} in range({int(xl[3])}, {int(xl[5])+1}):"
-            else:
-                return f"for {xl[1]} in range({xl[3]}, {xl[5]}):"
 
         # --> WHILE loop
         if xl[0] == "WHILE":
@@ -340,12 +360,6 @@ def exit(line):
     if line in end_commands: return True 
 
 
-def ending_process():
-    print()
-    print("ENDING_PROCESS")
-    print()
-
-
 def input_line():
     global line_counter
     x = input(f"{line_counter}: ")
@@ -372,9 +386,7 @@ def cr_append(x):
 def full_main_func():
     while True:
         x = input_line()
-        if exit(x): 
-            ending_process()
-            break
+        if exit(x): break
         pcc_append(x)
         cr_append(x)
         line_increment()
@@ -383,7 +395,6 @@ def full_main_func():
 def converting_():
     import random
     import time
-    import sys
     import os
     if len(pcc) != 0:
         # silly little animation - I was bored
@@ -391,11 +402,19 @@ def converting_():
         percentage = random.randint(0, 30)
         for _ in range(1):
             for x in at:
-                percentage += 10 
-                s = x*50 + f" Converting {percentage}% " + x*50
-                sys.stdout.write('\r' + s)
-                sys.stdout.flush()
-                time.sleep(.5)
+                percentage += 10
+                print()
+                print()
+                print()
+                print(x*100)
+                s = x*34 + f" Converting {percentage}% " + x*50
+                print(s)
+                print(x*100)
+                print()
+                print()
+                print()
+                time.sleep(.3)
+                os.system('cls' if os.name == 'nt' else 'clear')
     os.system('cls' if os.name == 'nt' else 'clear')
     print()
 
@@ -423,14 +442,17 @@ def final_ending_process():
 
 
 def reset_():
+    import os
     global pcc, cr, ef, classes, line_counter, flag_list
-    x = "a"
-    while x != 'y' or x != 'n':
+    x = ""
+    while x != "y" and x != "n":
         x = input("Would you like to go again? y or n: ")
+
     if x == 'n':
         print('\n' + 'Okay, program ending...')
         return False
-    else:
+    elif x == 'y':
+        os.system('cls' if os.name == 'nt' else 'clear')
         pcc, cr, ef, classes = [[] for _ in range(4)]
         line_counter = 0
         flag_list = [False for _ in range(21)]
@@ -443,7 +465,7 @@ def main():
         global ef    
         full_main_func()
         converting_()
-        #indentation_()
+        # indentation_()
         final_ending_process()
         if not reset_(): break
 
