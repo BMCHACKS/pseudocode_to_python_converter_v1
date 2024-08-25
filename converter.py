@@ -1,15 +1,37 @@
 '''
     how it works:
-    input is taken line by line, instead of taking it all and storing it in a list, 
+    input is taken line by line, instead of taking it all and storing it in a list (which would've been better), 
     each line is converted and then stored in the list till 'END' is entered where
-    converted lines are output, any extra function called i.e other_fuctions_2(), it 
-    is added to the main program once.
+    converted lines are output, any extra function called i.e other_fuctions_2(), it
+    is added to the main program once. That's all, very simple!
 '''
 
 # global vars
 pcc, cr, ef, classes = [[] for _ in range(4)]
 line_counter = 0
 flag_list = [False for _ in range(21)]
+file_data = [False, ""]
+
+
+def read_from_file_checker():
+    global file_data
+    x = input("Do you want to enter manually or read code from file? (y or n): ")
+    while x != 'y' and x != 'n':
+        x = input("Please enter 'y' for reading from file or 'n' for manual input: ")
+    if x == 'n':
+        file_data.append(False)
+        print("\n -- Taking Input Manually -- \n")
+    else:
+        a = False
+        while not a:
+            file_name = input("Enter the name of the file (include .txt at the end): ")
+            try:
+                file = open(file_name)
+                file_data[0] = True
+                file_data[1] = file_name
+                a = True
+            except FileNotFoundError:
+                print("File does not exist or file name is wrong. Please try again.")
 
 
 def boolean_fixer(al):
@@ -146,7 +168,7 @@ def class_fixer():
     s = "   def __init__(self"
     for x in to_add:
             s = s + ", " + x
-    classes.append(f"{s})")
+    classes.append(f"{s}):")
     for x in to_add:
             classes.append(f"       self.{x} = {x}")
     
@@ -248,7 +270,7 @@ def converter(x):
                 index_step = xl.index("STEP")
                 second_var = " ".join(xl[index_to+1: index_step])
                 step = " ".join(xl[index_step+1:])
-                return f"for {xl[1]} in range({first_var}, {second_var}, {step}) "
+                return f"for {xl[1]} in range({first_var}, {second_var}, {step}):"
             
         # aritimatic stuff
         if any(symbol in xl for symbol in artimatic_symbols):
@@ -369,6 +391,17 @@ def input_line():
     x = input(f"{line_counter}: ")
     return x
 
+def input_line_from_file():
+    global line_counter
+    file = open(file_data[1])
+    for line in file:
+        x = line
+        print(f"{line_counter}: {x}")
+        pcc_append(x)
+        cr_append(x)
+        line_increment()
+    file.close()
+
 
 def pcc_append(x):
     if x != "":
@@ -387,13 +420,21 @@ def cr_append(x):
     cr.append(x)
 
 
+def input_line_manual():
+    while True:    
+            x = input_line()
+            if exit(x): break
+            pcc_append(x)
+            cr_append(x)
+            line_increment()
+
+
 def full_main_func():
-    while True:
-        x = input_line()
-        if exit(x): break
-        pcc_append(x)
-        cr_append(x)
-        line_increment()
+    read_from_file_checker()
+    if not file_data[0]:
+        input_line_manual()
+    else:
+        input_line_from_file()
 
 
 def converting_():
@@ -466,12 +507,13 @@ def reset_():
 def main():
     while True:
         print('\n' + "Enter 'END' to convert.")
-        global ef    
+        global ef
         full_main_func()
         converting_()
-        # indentation_()
+        indentation_()
         final_ending_process()
         if not reset_(): break
 
 
 main()
+
